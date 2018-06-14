@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'interface.ui'
+# Form implementation generated from reading ui file 'new_interface.ui'
 #
-# Created: Tue Jun 12 13:33:37 2018
+# Created: Thu Jun 14 13:30:50 2018
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
+# requirement sudo apt-get install python-qwt5-qt4
+
 
 from PyQt4 import QtCore, QtGui
+import PyQt4.Qwt5 as Qwt
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -46,19 +49,26 @@ class Ui_MainWindow(object):
         self.UART_checkbox = QtGui.QCheckBox(self.centralwidget)
         self.UART_checkbox.setObjectName(_fromUtf8("UART_checkbox"))
         self.gridLayout_2.addWidget(self.UART_checkbox, 1, 0, 1, 1)
-        self.gridLayout.addLayout(self.gridLayout_2, 0, 6, 1, 1)
+        self.gridLayout.addLayout(self.gridLayout_2, 0, 0, 1, 1)
         self.perso_button = QtGui.QPushButton(self.centralwidget)
         self.perso_button.setObjectName(_fromUtf8("perso_button"))
-        self.gridLayout.addWidget(self.perso_button, 1, 6, 1, 1)
-        self.dial = QtGui.QDial(self.centralwidget)
-        self.dial.setObjectName(_fromUtf8("dial"))
-        self.gridLayout.addWidget(self.dial, 10, 0, 1, 15)
+        self.gridLayout.addWidget(self.perso_button, 1, 0, 1, 1)
         self.input_text = QtGui.QTextBrowser(self.centralwidget)
         self.input_text.setObjectName(_fromUtf8("input_text"))
-        self.gridLayout.addWidget(self.input_text, 0, 14, 1, 1)
+        self.gridLayout.addWidget(self.input_text, 0, 3, 1, 1)
+        self.Compass = Qwt.QwtCompass(self.centralwidget)
+        self.Compass.setLineWidth(4)
+        self.Compass.setObjectName(_fromUtf8("Compass"))
+        self.gridLayout.addWidget(self.Compass, 2, 0, 1, 1)
+        self.Knob = Qwt.QwtKnob(self.centralwidget)
+        self.Knob.setObjectName(_fromUtf8("Knob"))
+        self.gridLayout.addWidget(self.Knob, 2, 1, 1, 1)
         self.RUN_button = QtGui.QPushButton(self.centralwidget)
         self.RUN_button.setObjectName(_fromUtf8("RUN_button"))
-        self.gridLayout.addWidget(self.RUN_button, 1, 10, 1, 1)
+        self.gridLayout.addWidget(self.RUN_button, 1, 1, 1, 1)
+        self.qwtPlot = Qwt.QwtPlot(self.centralwidget)
+        self.qwtPlot.setObjectName(_fromUtf8("qwtPlot"))
+        self.gridLayout.addWidget(self.qwtPlot, 2, 3, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 945, 19))
@@ -92,14 +102,3 @@ class Ui_MainWindow(object):
         self.menuMenu.setTitle(_translate("MainWindow", "Menu", None))
         self.actionSettings.setText(_translate("MainWindow", "Settings", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    MainWindow = QtGui.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
-
