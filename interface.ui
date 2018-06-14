@@ -68,7 +68,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QwtKnob" name="Knob"/>
+     <widget class="QwtKnob" name="pota"/>
     </item>
     <item row="1" column="1">
      <widget class="QPushButton" name="RUN_button">

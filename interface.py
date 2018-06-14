@@ -2,15 +2,12 @@
 
 # Form implementation generated from reading ui file 'new_interface.ui'
 #
-# Created: Thu Jun 14 13:30:50 2018
+# Created: Thu Jun 14 15:03:57 2018
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
-# requirement sudo apt-get install python-qwt5-qt4
-
 
 from PyQt4 import QtCore, QtGui
-import PyQt4.Qwt5 as Qwt
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -56,17 +53,17 @@ class Ui_MainWindow(object):
         self.input_text = QtGui.QTextBrowser(self.centralwidget)
         self.input_text.setObjectName(_fromUtf8("input_text"))
         self.gridLayout.addWidget(self.input_text, 0, 3, 1, 1)
-        self.Compass = Qwt.QwtCompass(self.centralwidget)
+        self.Compass = QwtCompass(self.centralwidget)
         self.Compass.setLineWidth(4)
         self.Compass.setObjectName(_fromUtf8("Compass"))
         self.gridLayout.addWidget(self.Compass, 2, 0, 1, 1)
-        self.Knob = Qwt.QwtKnob(self.centralwidget)
-        self.Knob.setObjectName(_fromUtf8("Knob"))
-        self.gridLayout.addWidget(self.Knob, 2, 1, 1, 1)
+        self.pota = QwtKnob(self.centralwidget)
+        self.pota.setObjectName(_fromUtf8("pota"))
+        self.gridLayout.addWidget(self.pota, 2, 1, 1, 1)
         self.RUN_button = QtGui.QPushButton(self.centralwidget)
         self.RUN_button.setObjectName(_fromUtf8("RUN_button"))
         self.gridLayout.addWidget(self.RUN_button, 1, 1, 1, 1)
-        self.qwtPlot = Qwt.QwtPlot(self.centralwidget)
+        self.qwtPlot = QwtPlot(self.centralwidget)
         self.qwtPlot.setObjectName(_fromUtf8("qwtPlot"))
         self.gridLayout.addWidget(self.qwtPlot, 2, 3, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -102,3 +99,7 @@ class Ui_MainWindow(object):
         self.menuMenu.setTitle(_translate("MainWindow", "Menu", None))
         self.actionSettings.setText(_translate("MainWindow", "Settings", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
+
+from qwt_knob import QwtKnob
+from qwt_plot import QwtPlot
+from qwt_compass import QwtCompass

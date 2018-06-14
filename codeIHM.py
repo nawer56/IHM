@@ -3,6 +3,13 @@ from PyQt4 import QtGui
 import interface
 from tsl2561 import TSL2561
 
+#Default period 10Khz
+def managePWM(period=100000, duty=50000 ):
+    print("period: " , period)
+    print("duty: " , duty)
+
+
+
 class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
     def __init__(self, parent=None):
         # access variables, methods etc in the interface.py file
@@ -15,17 +22,24 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
         self.SPI_checkbox.stateChanged.connect(self.SPI_state)
         self.ANALOG_checkbox.stateChanged.connect(self.Anlog_state)
         self.I2C_checkbox.stateChanged.connect(self.I2C_state)
+        self.pota.valueChanged.connect(self.PWM_generator)
 
 
     def personalize(self):
         print("ok")
+
+    def PWM_generator(self):
+        print(self.pota.value())
+	duty = self.pota.value()*10000
+        managePWM(duty=duty)
+
 
     def I2C_state(self):
         print("I2C : " , self.I2C_checkbox.isChecked())
         if(self.I2C_checkbox.isChecked()):
             # self.input_text.append("I2C")
             tsl = TSL2561(debug=True)
-            self.input_text.append("I2C : ", tsl.lux())
+            self.input_text.append("I2C : " + str(tsl.lux()))
 
     def UART_state(self):
         print("UART : " , self.UART_checkbox.isChecked())
