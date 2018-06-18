@@ -2,13 +2,38 @@ import sys
 from PyQt4 import QtGui
 import interface
 from tsl2561 import TSL2561
+# import Adafruit_BBIO.PWM as PWM
+
 
 #Default period 10Khz
-def managePWM(period=100000, duty=50000 ):
+def managePWM(period=100000, duty=5 ):
+    duty = duty *(period/100)
     print("period: " , period)
     print("duty: " , duty)
+    #PWM.start("P9_14", duty, period, 0)
+    write_pwm(period, duty)
 
 
+def init_pwm():
+    file = open("/sys/devices/bone_capemgr.9/slots", "w")
+    if file is None:
+        print("Cape not found")
+    file.write("am33xx_pwm")
+    file.flush()
+    file.write("bone_pwm_P9_14")
+    file.close()
+
+def write_pwm(period,duty):
+    #init_pwm()
+    pol = open("/sys/devices/ocp.3//pwm_test_P9_14.14/polarity","w")
+    dut = open("/sys/devices/ocp.3//pwm_test_P9_14.14/duty","w")
+    per = open("/sys/devices/ocp.3//pwm_test_P9_14.14/period","w")
+    pol.write("0")
+    pol.close()
+    dut.write(str(duty))
+    dut.close()
+    per.write(str(period))
+    per.close()
 
 class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -30,8 +55,12 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
 
     def PWM_generator(self):
         print(self.pota.value())
-	duty = self.pota.value()*10000
+	    duty = int(self.pota.value()*10)
         managePWM(duty=duty)
+
+    def plotWindow(self)
+        self.qwtPlot.setXaxis("PWM_generator")
+        self.qwtPlot.addLegend()
 
 
     def I2C_state(self):
@@ -62,3 +91,5 @@ if __name__ == '__main__':
     form = Interface()
     form.show()
     app.exec_()
+    PWM.stop("P9_14")
+    PWM.cleanup()
