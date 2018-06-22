@@ -1,8 +1,9 @@
 import sys
 from PyQt4 import QtGui
 import interface
+import Adafruit_GPIO.I2C as I2C
 from tsl2561 import TSL2561
-# import Adafruit_BBIO.PWM as PWM
+import vxi11
 
 
 class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
@@ -17,35 +18,81 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
 	self.LCD_command()
 	self.lcdNumber.setHexMode()
 
+	#oscillo command
+	self.instr = vxi11.Instrument("172.17.2.170")
+
+	#checkbox function
+	self.ANALOG_checkbox.stateChanged.connect(self.AnalogRead)
+	self.SPI_checkbox.stateChanged.connect(self.SPI)
+	self.UART_checkbox.stateChanged.connect(self.UART)
+
 	#attach function to button
-        self.perso_button.clicked.connect(self.personalize)
-	self.RUN_button.clicked.connect(self.run)
 	self.plus_button.clicked.connect(self.plus)
 	self.minus_button.clicked.connect(self.minus)
+	self.Vmax_button.clicked.connect(self.Vmax)
+	self.Vpp_button.clicked.connect(self.Vpp)
+	self.stop_button.clicked.connect(self.stop)
 
-	#attach fonction to pota
+	#attach fonction to PWM
         self.pota.valueChanged.connect(self.setDuty)
+	self.lineEdit.returnPressed.connect(self.setPeriod)
+        self.lire_button.clicked.connect(self.readI2c)
+        self.ecrire_button.clicked.connect(self.writeI2c)
+	self.nom_registre.editingFinished.connect(self.getRegister)
+        self.nom_donnee.editingFinished.connect(self.getData)
+
 	self.period = 0
 	self.duty = 0
 
 	f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/polarity","w")
-	f.write(0)
+	f.write("0")
 	f.close()
 
-############ RUN BUTTON ############
+	self.trame = I2C.Device(0x20,1)
+	self.trame.write8(0x00,0x00)
+	
+########### I2C  ########
 
-    def run(self):
-	if(self.UART_checkbox.isChecked()):
-            self.UART()
+    def getData(self):
+	self.data = self.nom_donnee.text()
+	print(self.data)
 
-        if(self.I2C_checkbox.isChecked()):
-            self.I2C()
+    def getRegister(self):
+        self.register = self.nom_registre.text()
+	print int(self.register)
 
-        if(self.ANALOG_checkbox.isChecked()):
-            self.AnalogRead()
+    def writeI2c(self):
+	print("writeI2c")
+	if (self.data != None and self.register != None):
+	    print(str(self.data))
+	    
+            hexa = '0x'
+            hexa = hexa + str(self.data)
+            self.trame.write8(0x12,int(hexa,16))
 
-        if(self.SPI_checkbox.isChecked()):
-            self.SPI()
+
+    def readI2c(self):
+	print("readI2c")
+	self.lect = self.res_lect.text()
+
+	hexa = '0x'
+        hexa = hexa + str(self.data)
+        self.res=self.trame.readU8(int(hexa,16))
+	print self.res
+	self.input_text.append(str(self.res))
+
+########### OSCILLO COMMAND ########
+
+    def Vmax(self):
+	vmax = self.instr.ask(":MEAS:VMAX? CHANnel1 ")
+	self.textEdit.append("Vmax " + vmax)	
+
+    def Vpp(self):
+        vpp = self.instr.ask(":MEAS:VPP? CHANnel1 ")
+        self.textEdit.append("Vpp " + vpp)
+
+    def stop(self):
+	self.instr.write(":STOP")
 
 ############ AFFICHEUR #################
 
@@ -103,28 +150,27 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
 
 ############ PWM ############
 
-
     def setDuty(self):
 
 	f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/period","r")
 	self.period = f.read()
 	f.close()
 
-	print(self.period)
-
-	print(self.pota.value())
         self.duty = int(self.period) * int(self.pota.value())/10.0
 	self.duty = int(self.duty)
 
-        print(self.duty)
         f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/duty","w")
 	f.write(str(self.duty))
 	f.close()
 
-#    def plotWindow(self):
-#        self.qwtPlot.setLabel("left","PWM_generator")
-#        self.qwtPlot.addLegend()
+    def setPeriod(self):
+	self.period = self.lineEdit.text()
+	
+	f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/period","w")
+	f.write(self.period)
+        f.close()
 
+	
 ############# FONCTION PROTOCOL ##########
 
     def AnalogRead(self):
@@ -134,7 +180,6 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
 	self.input_text.append(ana)
 
     def I2C(self):
-        print("I2C : " , self.I2C_checkbox.isChecked())
         tsl = TSL2561(debug=True)
         self.input_text.append("I2C : " + str(tsl.lux()))
 
