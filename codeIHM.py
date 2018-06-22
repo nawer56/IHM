@@ -5,35 +5,6 @@ from tsl2561 import TSL2561
 # import Adafruit_BBIO.PWM as PWM
 
 
-#Default period 10Khz
-def managePWM(period=100000, duty=5 ):
-    duty = duty *(period/100)
-    print("period: " , period)
-    print("duty: " , duty)
-    write_pwm(period, duty)
-
-
-def init_pwm():
-    file = open("/sys/devices/bone_capemgr.9/slots", "w")
-    if file is None:
-        print("Cape not found")
-    file.write("am33xx_pwm")
-    file.flush()
-    file.write("bone_pwm_P9_14")
-    file.close()
-
-def write_pwm(period,duty):
-    #init_pwm()
-    pol = open("/sys/devices/ocp.3//pwm_test_P9_14.14/polarity","w")
-    dut = open("/sys/devices/ocp.3//pwm_test_P9_14.14/duty","w")
-    per = open("/sys/devices/ocp.3//pwm_test_P9_14.14/period","w")
-    pol.write("0")
-    pol.close()
-    dut.write(str(duty))
-    dut.close()
-    per.write(str(period))
-    per.close()
-
 class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
     def __init__(self, parent=None):
         # access variables, methods etc in the interface.py file
@@ -53,7 +24,15 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
 	self.minus_button.clicked.connect(self.minus)
 
 	#attach fonction to pota
-        self.pota.valueChanged.connect(self.PWM_generator)
+        self.pota.valueChanged.connect(self.setDuty)
+	self.period = 0
+	self.duty = 0
+
+	f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/polarity","w")
+	f.write(0)
+	f.close()
+
+############ RUN BUTTON ############
 
     def run(self):
 	if(self.UART_checkbox.isChecked()):
@@ -68,18 +47,18 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
         if(self.SPI_checkbox.isChecked()):
             self.SPI()
 
+############ AFFICHEUR #################
+
     def minus(self):
 	self.i = self.i - 1
 	if self.i == -1:
 	    self.i = 15
-	print hex(self.i)
 	self.LCD_command()
 
     def plus(self):
 	self.i = self.i + 1
 	if self.i ==16:
 	    self.i = 0
-	print hex(self.i)
 	self.LCD_command()
 
     def LCD_command(self):
@@ -117,17 +96,36 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
             f.write("1")
         f.close()
 
+############# PERSO ##################
+
     def personalize(self):
         print("ok")
 
-    def PWM_generator(self):
-        print(self.pota.value())
-	duty = int(self.pota.value()*10)
-        managePWM(duty=duty)
+############ PWM ############
 
-    def plotWindow(self):
-        self.qwtPlot.setLabel("left","PWM_generator")
-        self.qwtPlot.addLegend()
+
+    def setDuty(self):
+
+	f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/period","r")
+	self.period = f.read()
+	f.close()
+
+	print(self.period)
+
+	print(self.pota.value())
+        self.duty = int(self.period) * int(self.pota.value())/10.0
+	self.duty = int(self.duty)
+
+        print(self.duty)
+        f = open("/sys/devices/ocp.3/pwm_test_P9_16.15/duty","w")
+	f.write(str(self.duty))
+	f.close()
+
+#    def plotWindow(self):
+#        self.qwtPlot.setLabel("left","PWM_generator")
+#        self.qwtPlot.addLegend()
+
+############# FONCTION PROTOCOL ##########
 
     def AnalogRead(self):
 	f = open("/sys/devices/ocp.3/helper.14/AIN0","r")
@@ -147,6 +145,8 @@ class Interface(QtGui.QMainWindow, interface.Ui_MainWindow):
     def SPI(self):
         print("SPI : " , self.SPI_checkbox.isChecked())
         self.input_text.append("SPI")
+
+############# MAIN #########
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
